@@ -55,6 +55,9 @@ class WhatsAppService {
             '--no-first-run',
             '--no-zygote',
             '--disable-gpu',
+            '--single-process',
+            '--disable-extensions',
+            '--js-flags="--max-old-space-size=256"',
           ],
         },
       });
