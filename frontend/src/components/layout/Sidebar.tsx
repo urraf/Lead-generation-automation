@@ -75,11 +75,10 @@ export default function Sidebar() {
             <NavLink
               key={path}
               to={path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
                   ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20'
                   : 'text-surface-300 hover:bg-surface-800 hover:text-surface-100'
-              }`}
+                }`}
             >
               <Icon className="w-5 h-5" />
               {label}
@@ -97,6 +96,12 @@ export default function Sidebar() {
                 <img src={waStatus.qr} alt="WhatsApp QR Code" className="w-full h-auto rounded-lg" />
                 <p className="text-center text-xs text-surface-900 mt-2 font-medium">Scan to link</p>
               </div>
+            ) : waStatus?.authenticated ? (
+              <div className="p-6 rounded-xl border border-emerald-700/50 bg-emerald-800/20 flex flex-col items-center justify-center text-center">
+                <div className="w-6 h-6 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-3"></div>
+                <p className="text-xs text-emerald-200 font-medium">Syncing WhatsApp...</p>
+                <p className="text-[10px] text-emerald-400/80 mt-1">Downloading messages</p>
+              </div>
             ) : (
               <div className="p-6 rounded-xl border border-surface-700/50 bg-surface-800/30 flex flex-col items-center justify-center text-center">
                 <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin mb-3"></div>
@@ -107,9 +112,8 @@ export default function Sidebar() {
           </div>
         )}
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-800/50">
-          <div className={`w-2.5 h-2.5 rounded-full ${
-            waStatus?.ready ? 'bg-emerald-400 animate-pulse-soft' : 'bg-amber-400 animate-pulse'
-          }`} />
+          <div className={`w-2.5 h-2.5 rounded-full ${waStatus?.ready ? 'bg-emerald-400 animate-pulse-soft' : 'bg-amber-400 animate-pulse'
+            }`} />
           <div>
             <p className="text-xs font-medium text-surface-200">WhatsApp</p>
             <p className="text-xs text-surface-300">

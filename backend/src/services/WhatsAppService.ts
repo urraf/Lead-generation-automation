@@ -11,6 +11,7 @@ type WhatsAppClient = InstanceType<typeof Client>;
 interface WhatsAppInstance {
   client: WhatsAppClient | null;
   isReady: boolean;
+  isAuthenticated: boolean;
   latestQRBase64: string | null;
   initializationPromise: Promise<void> | null;
 }
@@ -23,6 +24,7 @@ class WhatsAppService {
       this.instances.set(userId, {
         client: null,
         isReady: false,
+        isAuthenticated: false,
         latestQRBase64: null,
         initializationPromise: null,
       });
@@ -73,21 +75,26 @@ class WhatsAppService {
 
       instance.client.on('ready', () => {
         instance.isReady = true;
+        instance.isAuthenticated = true;
         instance.latestQRBase64 = null;
         logger.info(`WhatsApp [${userId}]: client is ready`);
       });
 
       instance.client.on('authenticated', () => {
-        logger.info(`WhatsApp [${userId}]: authenticated successfully`);
+        instance.isAuthenticated = true;
+        instance.latestQRBase64 = null;
+        logger.info(`WhatsApp [${userId}]: authenticated successfully, waiting for sync...`);
       });
 
       instance.client.on('auth_failure', (msg: string) => {
         instance.isReady = false;
+        instance.isAuthenticated = false;
         logger.error(`WhatsApp [${userId}]: authentication failure:`, msg);
       });
 
       instance.client.on('disconnected', async (reason: string) => {
         instance.isReady = false;
+        instance.isAuthenticated = false;
         logger.warn(`WhatsApp [${userId}]: disconnected:`, reason);
         try {
           await instance.client?.destroy();
@@ -150,10 +157,11 @@ class WhatsAppService {
     }
   }
 
-  getStatus(userId: string): { ready: boolean; qr?: string } {
+  getStatus(userId: string): { ready: boolean; qr?: string; authenticated?: boolean } {
     const instance = this.getInstance(userId);
     return {
       ready: instance.isReady,
+      authenticated: instance.isAuthenticated,
       ...(instance.latestQRBase64 && !instance.isReady ? { qr: instance.latestQRBase64 } : {}),
     };
   }
