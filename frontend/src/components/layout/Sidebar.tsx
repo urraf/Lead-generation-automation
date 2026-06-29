@@ -90,10 +90,20 @@ export default function Sidebar() {
 
       {/* WhatsApp Status */}
       <div className="p-4 border-t border-surface-700/30">
-        {!waStatus?.ready && waStatus?.qr && (
-          <div className="mb-4 bg-white p-2 rounded-xl">
-            <img src={waStatus.qr} alt="WhatsApp QR Code" className="w-full h-auto rounded-lg" />
-            <p className="text-center text-xs text-surface-900 mt-2 font-medium">Scan to link</p>
+        {!waStatus?.ready && (
+          <div className="mb-4">
+            {waStatus?.qr ? (
+              <div className="bg-white p-2 rounded-xl">
+                <img src={waStatus.qr} alt="WhatsApp QR Code" className="w-full h-auto rounded-lg" />
+                <p className="text-center text-xs text-surface-900 mt-2 font-medium">Scan to link</p>
+              </div>
+            ) : (
+              <div className="p-6 rounded-xl border border-surface-700/50 bg-surface-800/30 flex flex-col items-center justify-center text-center">
+                <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin mb-3"></div>
+                <p className="text-xs text-surface-200 font-medium">Loading QR Code...</p>
+                <p className="text-[10px] text-surface-400 mt-1">Starting secure browser</p>
+              </div>
+            )}
           </div>
         )}
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-800/50">
