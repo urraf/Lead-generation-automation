@@ -1,5 +1,9 @@
 import pkg from 'whatsapp-web.js';
-const { Client, LocalAuth } = pkg;
+const { Client, RemoteAuth } = pkg;
+// @ts-ignore
+import pkgMongo from 'wwebjs-mongo';
+const { MongoStore } = pkgMongo;
+import mongoose from 'mongoose';
 import puppeteer from 'puppeteer';
 import QRCode from 'qrcode';
 import { env } from '../config/env.js';
@@ -42,10 +46,13 @@ class WhatsAppService {
 
   private async doInitialize(userId: string, instance: WhatsAppInstance): Promise<void> {
     try {
+      const store = new MongoStore({ mongoose: mongoose });
+
       instance.client = new Client({
-        authStrategy: new LocalAuth({
+        authStrategy: new RemoteAuth({
           clientId: userId,
-          dataPath: env.WHATSAPP_SESSION_PATH,
+          store: store,
+          backupSyncIntervalMs: 300000
         }),
         puppeteer: {
           executablePath: puppeteer.executablePath(),
@@ -84,6 +91,10 @@ class WhatsAppService {
         instance.isAuthenticated = true;
         instance.latestQRBase64 = null;
         logger.info(`WhatsApp [${userId}]: authenticated successfully, waiting for sync...`);
+      });
+
+      instance.client.on('remote_session_saved', () => {
+        logger.info(`WhatsApp [${userId}]: remote session saved successfully to MongoDB`);
       });
 
       instance.client.on('auth_failure', (msg: string) => {
