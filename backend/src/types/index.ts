@@ -60,6 +60,7 @@ export interface ICampaign {
   country: string;
   state?: string;
   status: CampaignStatus;
+  isSearching: boolean;
   schedule?: ICampaignSchedule;
   filters: ICampaignFilters;
   stats: ICampaignStats;

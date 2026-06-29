@@ -54,12 +54,21 @@ export default function CampaignCard({ campaign, onAction, onDelete }: CampaignC
         </div>
       </div>
 
-      {/* Last Run */}
-      {lastRunAt && (
-        <p className="text-xs text-surface-300 mb-3">
-          Last run: {new Date(lastRunAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-        </p>
-      )}
+      {/* Last Run & Status */}
+      <div className="flex items-center justify-between mb-3">
+        {campaign.isSearching ? (
+          <div className="flex items-center gap-2 text-xs font-medium text-brand-400">
+            <div className="w-3.5 h-3.5 border-2 border-brand-400/30 border-t-brand-400 rounded-full animate-spin"></div>
+            <span className="animate-pulse">Searching for leads right now...</span>
+          </div>
+        ) : lastRunAt ? (
+          <p className="text-xs text-surface-300">
+            Last run: {new Date(lastRunAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+          </p>
+        ) : (
+          <p className="text-xs text-surface-500 italic">Never run</p>
+        )}
+      </div>
 
       {/* Actions */}
       <div className="flex items-center gap-2">

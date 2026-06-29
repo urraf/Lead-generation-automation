@@ -42,6 +42,10 @@ const campaignSchema = new Schema<CampaignDocument>(
       enum: ['ACTIVE', 'PAUSED', 'STOPPED', 'COMPLETED'] as CampaignStatus[],
       default: 'PAUSED',
     },
+    isSearching: {
+      type: Boolean,
+      default: false,
+    },
     schedule: {
       enabled: { type: Boolean, default: false },
       cronExpression: { type: String, default: '0 8 * * *' },

@@ -28,45 +28,53 @@ async function handleSearchJob(data: SearchJobData): Promise<void> {
       return;
     }
 
-    // Search Google Places
-    const businesses = await googlePlacesService.searchBusinesses(
-      campaign.category,
-      campaign.city,
-      campaign.country,
-      campaign.filters,
-    );
+    // Set isSearching to true
+    await campaignRepository.updateSearchingStatus(campaignId, true);
 
-    // Process results (filter, deduplicate, AI qualify, persist)
-    const { newLeads, duplicates, createdLeads } = await leadService.processSearchResults(
-      userId,
-      campaignId,
-      businesses,
-    );
+    try {
+      // Search Google Places
+      const businesses = await googlePlacesService.searchBusinesses(
+        campaign.category,
+        campaign.city,
+        campaign.country,
+        campaign.filters,
+      );
 
-    const duration = Date.now() - startTime;
+      // Process results (filter, deduplicate, AI qualify, persist)
+      const { newLeads, duplicates, createdLeads } = await leadService.processSearchResults(
+        userId,
+        campaignId,
+        businesses,
+      );
 
-    // Update campaign stats
-    await campaignRepository.updateStats(userId, campaignId, {
-      totalSearched: businesses.length,
-      totalLeads: newLeads,
-    });
-    await campaignRepository.updateLastRunAt(userId, campaignId);
+      const duration = Date.now() - startTime;
 
-    // Log the search
-    await SearchLog.create({
-      userId,
-      campaignId: campaign._id,
-      query: `${campaign.category} in ${campaign.city} ${campaign.country}`,
-      totalResults: businesses.length,
-      filteredResults: businesses.length,
-      newLeads,
-      duplicates,
-      duration,
-    });
+      // Update campaign stats
+      await campaignRepository.updateStats(userId, campaignId, {
+        totalSearched: businesses.length,
+        totalLeads: newLeads,
+      });
+      await campaignRepository.updateLastRunAt(userId, campaignId);
 
-    logger.info(
-      `Search completed for campaign "${campaign.name}": ${businesses.length} found, ${newLeads} new leads, ${duplicates} duplicates, took ${duration}ms`
-    );
+      // Log the search
+      await SearchLog.create({
+        userId,
+        campaignId: campaign._id,
+        query: `${campaign.category} in ${campaign.city} ${campaign.country}`,
+        totalResults: businesses.length,
+        filteredResults: businesses.length,
+        newLeads,
+        duplicates,
+        duration,
+      });
+
+      logger.info(
+        `Search completed for campaign "${campaign.name}": ${businesses.length} found, ${newLeads} new leads, ${duplicates} duplicates, took ${duration}ms`
+      );
+    } finally {
+      // Always reset isSearching to false
+      await campaignRepository.updateSearchingStatus(campaignId, false);
+    }
   } catch (error) {
     const duration = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -85,7 +93,9 @@ async function handleSearchJob(data: SearchJobData): Promise<void> {
       duration,
       error: errorMessage,
     });
-
+    
+    // Also reset on catastrophic failure
+    await campaignRepository.updateSearchingStatus(campaignId, false);
     throw error;
   }
 }

@@ -25,6 +25,7 @@ export function useCampaigns(page = 1, limit = 20) {
       const { data } = await client.get('/campaigns', { params: { page, limit } });
       return data;
     },
+    refetchInterval: 5000,
   });
 }
 

@@ -52,8 +52,16 @@ export class CampaignRepository {
     await Campaign.findOneAndUpdate({ _id: id, userId }, { $inc: update }).exec();
   }
 
-  async updateLastRunAt(userId: string, id: string): Promise<void> {
-    await Campaign.findOneAndUpdate({ _id: id, userId }, { $set: { lastRunAt: new Date() } }).exec();
+  async updateLastRunAt(userId: string, id: string): Promise<CampaignDocument | null> {
+    return Campaign.findOneAndUpdate(
+      { _id: id, userId },
+      { $set: { lastRunAt: new Date() } },
+      { new: true }
+    ).exec();
+  }
+
+  async updateSearchingStatus(id: string, isSearching: boolean): Promise<void> {
+    await Campaign.updateOne({ _id: id }, { $set: { isSearching } }).exec();
   }
 
   async delete(userId: string, id: string): Promise<boolean> {
